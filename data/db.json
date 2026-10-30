@@ -1,0 +1,172 @@
+{
+  "farmers": [
+    {
+      "id": 1,
+      "name": "Ramesh Kumar",
+      "phone": "+91 98765 43210",
+      "location": "Ludhiana, Punjab",
+      "acres": 15.5
+    },
+    {
+      "id": 2,
+      "name": "Sita Devi",
+      "phone": "+91 98112 23344",
+      "location": "Nashik, Maharashtra",
+      "acres": 8.2
+    },
+    {
+      "id": 3,
+      "name": "Balwinder Singh",
+      "phone": "+91 94567 89012",
+      "location": "Karnal, Haryana",
+      "acres": 22
+    },
+    {
+      "id": 4,
+      "name": "Arun Patel",
+      "phone": "+91 97234 56789",
+      "location": "Anand, Gujarat",
+      "acres": 12
+    }
+  ],
+  "crops": [
+    {
+      "id": 1,
+      "name": "Basmati Rice 1121",
+      "category": "Grains",
+      "basePrice": 85
+    },
+    {
+      "id": 2,
+      "name": "Organic Wheat (Sharbati)",
+      "category": "Grains",
+      "basePrice": 42
+    },
+    {
+      "id": 3,
+      "name": "Alphonso Mango",
+      "category": "Fruits",
+      "basePrice": 250
+    },
+    {
+      "id": 4,
+      "name": "Red Onion",
+      "category": "Vegetables",
+      "basePrice": 28
+    },
+    {
+      "id": 5,
+      "name": "Turmeric (Organic Lakadong)",
+      "category": "Spices",
+      "basePrice": 140
+    }
+  ],
+  "batches": [
+    {
+      "id": "BATCH-2026-RICE-01",
+      "farmerId": 1,
+      "farmerName": "Ramesh Kumar",
+      "farmLocation": "Ludhiana, Punjab",
+      "cropId": 1,
+      "cropName": "Basmati Rice 1121",
+      "quantityKg": 5000,
+      "harvestDate": "2026-10-15",
+      "qualityGrade": "Grade A (Export)",
+      "currentStatus": "In Transit",
+      "storageTemp": 20,
+      "createdAt": "2026-10-15T09:00:00Z"
+    },
+    {
+      "id": "BATCH-2026-WHEAT-02",
+      "farmerId": 3,
+      "farmerName": "Balwinder Singh",
+      "farmLocation": "Karnal, Haryana",
+      "cropId": 2,
+      "cropName": "Organic Wheat (Sharbati)",
+      "quantityKg": 8500,
+      "harvestDate": "2026-10-18",
+      "qualityGrade": "Grade A (Export)",
+      "currentStatus": "Cold Storage",
+      "storageTemp": 18,
+      "createdAt": "2026-10-18T10:30:00Z"
+    },
+    {
+      "id": "BATCH-2026-MANGO-03",
+      "farmerId": 2,
+      "farmerName": "Sita Devi",
+      "farmLocation": "Nashik, Maharashtra",
+      "cropId": 3,
+      "cropName": "Alphonso Mango",
+      "quantityKg": 1200,
+      "harvestDate": "2026-10-22",
+      "qualityGrade": "Grade A (Export)",
+      "currentStatus": "Distributed",
+      "storageTemp": 12.5,
+      "createdAt": "2026-10-22T08:15:00Z"
+    },
+    {
+      "id": "BATCH-2026-ONION-04",
+      "farmerId": 4,
+      "farmerName": "Arun Patel",
+      "farmLocation": "Anand, Gujarat",
+      "cropId": 4,
+      "cropName": "Red Onion",
+      "quantityKg": 3000,
+      "harvestDate": "2026-10-25",
+      "qualityGrade": "Grade B (Premium)",
+      "currentStatus": "Retail Shelved",
+      "storageTemp": 22,
+      "createdAt": "2026-10-25T11:00:00Z"
+    }
+  ],
+  "logistics": [
+    {
+      "id": 1,
+      "batchId": "BATCH-2026-RICE-01",
+      "transporterName": "Kisan Express Cold Transit",
+      "vehicleNumber": "PB-10-CX-4521",
+      "pickupLocation": "Ludhiana Mandi Gate 2",
+      "dropLocation": "Delhi Central Logistics Hub",
+      "dispatchDate": "2026-10-27",
+      "transitStatus": "In Transit",
+      "temperatureCelsius": 19.5
+    },
+    {
+      "id": 2,
+      "batchId": "BATCH-2026-MANGO-03",
+      "transporterName": "Sahyadri Cold Logistics",
+      "vehicleNumber": "MH-15-TR-9988",
+      "pickupLocation": "Nashik Farm Gate",
+      "dropLocation": "Mumbai APMC Vashi Terminal",
+      "dispatchDate": "2026-10-24",
+      "transitStatus": "Reached Destination",
+      "temperatureCelsius": 13
+    }
+  ],
+  "orders": [
+    {
+      "id": 1,
+      "batchId": "BATCH-2026-MANGO-03",
+      "cropName": "Alphonso Mango",
+      "retailerName": "Nature Fresh Supermarkets",
+      "city": "Mumbai",
+      "quantityKg": 500,
+      "pricePerKg": 290,
+      "totalAmount": 145000,
+      "orderDate": "2026-10-26",
+      "status": "Delivered"
+    },
+    {
+      "id": 2,
+      "batchId": "BATCH-2026-ONION-04",
+      "cropName": "Red Onion",
+      "retailerName": "Daily Greens Mart",
+      "city": "Ahmedabad",
+      "quantityKg": 1200,
+      "pricePerKg": 35,
+      "totalAmount": 42000,
+      "orderDate": "2026-10-28",
+      "status": "Confirmed"
+    }
+  ]
+}

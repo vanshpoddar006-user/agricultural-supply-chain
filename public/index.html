@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriChain - Agricultural Supply Chain Management</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="logo-icon">🌾</div>
+      <div class="brand-text">
+        <span class="brand-name">AgriChain</span>
+        <span class="brand-tag">Agricultural Supply Chain System</span>
+      </div>
+    </div>
+
+    <nav class="nav-links">
+      <button class="nav-btn active" data-tab="dashboard">📊 Dashboard</button>
+      <button class="nav-btn" data-tab="farmer">🚜 Farmer Portal</button>
+      <button class="nav-btn" data-tab="logistics">🚚 Cold Logistics</button>
+      <button class="nav-btn" data-tab="retail">🏪 Retail Hub</button>
+      <button class="nav-btn" data-tab="trace">🔍 Farm-to-Table Trace</button>
+      <button class="nav-btn" data-tab="academic">📘 Java + MySQL Docs</button>
+    </nav>
+
+    <div class="nav-status">
+      <span class="status-indicator"></span>
+      <span class="status-label">Backend Online</span>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-content">
+
+    <!-- KPI Metric Cards -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🌾</div>
+        <div class="stat-data">
+          <div class="stat-value" id="statVolume">-- kg</div>
+          <div class="stat-label">Total Volume Harvested</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-data">
+          <div class="stat-value" id="statBatches">--</div>
+          <div class="stat-label">Active Supply Batches</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🚚</div>
+        <div class="stat-data">
+          <div class="stat-value" id="statTransit">--</div>
+          <div class="stat-label">In Cold Transit</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-data">
+          <div class="stat-value" id="statRevenue">₹ --</div>
+          <div class="stat-label">Retail Value Generated</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 1: DASHBOARD / OVERVIEW -->
+    <div class="tab-pane active" id="tab-dashboard">
+      <div class="content-header">
+        <div>
+          <h2>Supply Chain Live Inventory</h2>
+          <p class="subtitle">Monitor batch progression across Farm, Cold Storage, Transit, and Retail.</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-secondary" id="refreshBtn">🔄 Refresh Data</button>
+          <button class="btn btn-primary" onclick="switchTab('farmer')">+ Register New Harvest</button>
+        </div>
+      </div>
+
+      <div class="card table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Batch ID</th>
+              <th>Crop Name</th>
+              <th>Farmer / Origin</th>
+              <th>Quantity (Kg)</th>
+              <th>Quality Grade</th>
+              <th>Harvest Date</th>
+              <th>Storage Temp</th>
+              <th>Current Stage</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="batchTableBody">
+            <tr><td colspan="9" class="loading-cell">Loading batch records...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: FARMER PORTAL -->
+    <div class="tab-pane" id="tab-farmer">
+      <div class="content-header">
+        <div>
+          <h2>Farmer Harvest Registration</h2>
+          <p class="subtitle">Digitally record newly harvested produce with traceability credentials.</p>
+        </div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Form -->
+        <div class="card">
+          <h3 class="card-title">Register Harvest Batch</h3>
+          <form id="createBatchForm" class="form-grid">
+            <div class="form-group">
+              <label for="batchId">Batch ID (Auto/Custom)</label>
+              <input type="text" id="batchId" class="input-control" placeholder="e.g. BATCH-2026-RICE-05" required>
+            </div>
+
+            <div class="form-group">
+              <label for="farmerSelect">Farmer / Producer</label>
+              <select id="farmerSelect" class="input-control" required></select>
+            </div>
+
+            <div class="form-group">
+              <label for="cropSelect">Crop Selection</label>
+              <select id="cropSelect" class="input-control" required></select>
+            </div>
+
+            <div class="form-group">
+              <label for="quantityKg">Harvest Quantity (Kilograms)</label>
+              <input type="number" id="quantityKg" class="input-control" placeholder="e.g. 2500" min="1" required>
+            </div>
+
+            <div class="form-group">
+              <label for="qualityGrade">Quality Inspection Grade</label>
+              <select id="qualityGrade" class="input-control">
+                <option value="Grade A (Export)">Grade A (Export Quality)</option>
+                <option value="Grade B (Premium)">Grade B (Domestic Premium)</option>
+                <option value="Grade C (Standard)">Grade C (Standard Processing)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="storageTemp">Storage Temperature (°C)</label>
+              <input type="number" id="storageTemp" class="input-control" value="18.0" step="0.5" required>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary btn-block">🌱 Record Harvest to Supply Chain</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Info Card -->
+        <div class="card info-panel">
+          <h3 class="card-title">Registered Regional Producers</h3>
+          <p class="text-muted">Verified farmers enrolled in the digital cooperative network:</p>
+          <div class="farmer-list" id="farmerList">
+            <!-- Dynamic Farmer Cards -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: LOGISTICS & COLD TRANSIT -->
+    <div class="tab-pane" id="tab-logistics">
+      <div class="content-header">
+        <div>
+          <h2>Logistics & Cold Storage Chain</h2>
+          <p class="subtitle">Monitor real-time refrigerated transport, route dispatch, and cold storage.</p>
+        </div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Dispatch Form -->
+        <div class="card">
+          <h3 class="card-title">Dispatch Transport Fleet</h3>
+          <form id="logisticsForm" class="form-grid">
+            <div class="form-group">
+              <label for="logisticsBatchSelect">Select Harvest Batch</label>
+              <select id="logisticsBatchSelect" class="input-control" required></select>
+            </div>
+
+            <div class="form-group">
+              <label for="transporterName">Transporter / Fleet Agency</label>
+              <input type="text" id="transporterName" class="input-control" value="Kisan Cargo Cold Liners" required>
+            </div>
+
+            <div class="form-group">
+              <label for="vehicleNumber">Vehicle License Number</label>
+              <input type="text" id="vehicleNumber" class="input-control" value="HR-02-EK-7721" required>
+            </div>
+
+            <div class="form-group">
+              <label for="pickupLocation">Origin / Farm Gate</label>
+              <input type="text" id="pickupLocation" class="input-control" placeholder="e.g. Ludhiana Mandi Gate" required>
+            </div>
+
+            <div class="form-group">
+              <label for="dropLocation">Destination / Wholesale APMC</label>
+              <input type="text" id="dropLocation" class="input-control" placeholder="e.g. Delhi Azadpur Terminal" required>
+            </div>
+
+            <div class="form-group">
+              <label for="tempCelsius">Refrigerated Container Temp (°C)</label>
+              <input type="number" id="tempCelsius" class="input-control" value="16.5" step="0.5" required>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary btn-block">🚛 Dispatch Shipment</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Active Transit Shipments -->
+        <div class="card">
+          <h3 class="card-title">Live Dispatched Shipments</h3>
+          <div class="shipment-list" id="shipmentList">
+            <!-- Dynamic shipments -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: RETAIL & ORDERS -->
+    <div class="tab-pane" id="tab-retail">
+      <div class="content-header">
+        <div>
+          <h2>Retail & Distribution Hub</h2>
+          <p class="subtitle">Wholesalers and retail supermarkets purchase authenticated farm batches.</p>
+        </div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Order Form -->
+        <div class="card">
+          <h3 class="card-title">Place Supermarket / Retail Order</h3>
+          <form id="orderForm" class="form-grid">
+            <div class="form-group">
+              <label for="orderBatchSelect">Select Available Batch</label>
+              <select id="orderBatchSelect" class="input-control" required></select>
+            </div>
+
+            <div class="form-group">
+              <label for="retailerName">Supermarket / Retailer Name</label>
+              <input type="text" id="retailerName" class="input-control" placeholder="e.g. FreshBasket Organics" required>
+            </div>
+
+            <div class="form-group">
+              <label for="orderCity">Retail Destination City</label>
+              <input type="text" id="orderCity" class="input-control" placeholder="e.g. Bangalore" required>
+            </div>
+
+            <div class="form-group">
+              <label for="orderQuantityKg">Order Quantity (Kg)</label>
+              <input type="number" id="orderQuantityKg" class="input-control" value="500" min="1" required>
+            </div>
+
+            <div class="form-group">
+              <label for="orderPrice">Wholesale Price (₹ / Kg)</label>
+              <input type="number" id="orderPrice" class="input-control" value="95" step="1" required>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary btn-block">🛒 Confirm Purchase Order</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="card">
+          <h3 class="card-title">Fulfilled Distribution Orders</h3>
+          <div class="order-list" id="orderList">
+            <!-- Dynamic orders -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: CONSUMER TRACEABILITY -->
+    <div class="tab-pane" id="tab-trace">
+      <div class="content-header">
+        <div>
+          <h2>Farm-to-Table Consumer Traceability</h2>
+          <p class="subtitle">Verify origin, cold chain logs, and quality inspection of any crop batch.</p>
+        </div>
+      </div>
+
+      <div class="trace-search-bar card">
+        <label for="traceInput">Enter Crop Batch ID or Scan QR:</label>
+        <div class="search-input-group">
+          <input type="text" id="traceInput" class="input-control" placeholder="e.g. BATCH-2026-RICE-01" value="BATCH-2026-RICE-01">
+          <button class="btn btn-primary" id="traceBtn">🔎 Trace Journey</button>
+        </div>
+        <div class="quick-tags">
+          <span>Try quick lookup:</span>
+          <a href="#" class="chip-link" onclick="quickTrace('BATCH-2026-RICE-01')">BATCH-2026-RICE-01</a>
+          <a href="#" class="chip-link" onclick="quickTrace('BATCH-2026-WHEAT-02')">BATCH-2026-WHEAT-02</a>
+          <a href="#" class="chip-link" onclick="quickTrace('BATCH-2026-MANGO-03')">BATCH-2026-MANGO-03</a>
+          <a href="#" class="chip-link" onclick="quickTrace('BATCH-2026-ONION-04')">BATCH-2026-ONION-04</a>
+        </div>
+      </div>
+
+      <!-- Trace Results Timeline -->
+      <div id="traceResults" class="trace-result-card card" style="display: none;">
+        <!-- Injected by JavaScript -->
+      </div>
+    </div>
+
+    <!-- TAB 6: ACADEMIC & JAVA/MYSQL DOCS -->
+    <div class="tab-pane" id="tab-academic">
+      <div class="content-header">
+        <div>
+          <h2>Project Architecture & Academic Documentation</h2>
+          <p class="subtitle">Complete technical overview of Java + Applet/Swing + MySQL Database Connectivity.</p>
+        </div>
+      </div>
+
+      <div class="academic-grid">
+        <div class="card">
+          <h3 class="card-title">🗄️ MySQL Database Connectivity</h3>
+          <p class="text-muted">The system contains a production-ready SQL script in <code>database.sql</code>:</p>
+          <pre class="code-block"><code>-- Quick MySQL setup
+CREATE DATABASE agri_supply_chain;
+USE agri_supply_chain;
+SOURCE database.sql;</code></pre>
+          <p class="text-sm">Tables included: <code>farmers</code>, <code>crops</code>, <code>batches</code>, <code>logistics</code>, <code>retail_orders</code>.</p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">☕ Java + Applet / Swing Implementation</h3>
+          <p class="text-muted">Your workspace includes full standalone Java source files:</p>
+          <ul class="file-list">
+            <li><strong><code>DBConnection.java</code></strong>: Handles JDBC connection via <code>com.mysql.cj.jdbc.Driver</code>.</li>
+            <li><strong><code>AgriSupplyChainApp.java</code></strong>: Dual-mode application (extends <code>JApplet</code> for legacy applet submission & includes <code>main()</code> for modern desktop execution).</li>
+          </ul>
+          <pre class="code-block"><code># Compile Java Application:
+javac -cp ".;mysql-connector-j.jar" *.java
+
+# Run Desktop / Applet Window:
+java -cp ".;mysql-connector-j.jar" AgriSupplyChainApp</code></pre>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">🌐 Why Modern Web + Java Dual Architecture?</h3>
+          <p class="text-muted">Modern web browsers (Chrome, Edge, Firefox) deprecated and removed Java Applet NPAPI plugins. By providing both:</p>
+          <ul>
+            <li>✅ <strong>Modern Website:</strong> Instantly interactable in any modern browser on PC, tablet, or phone.</li>
+            <li>✅ <strong>Java + Applet Source:</strong> Fully satisfies syllabus requirements for university or college presentations.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast">Action completed successfully</div>
+
+  <script src="app.js"></script>
+</body>
+</html>
