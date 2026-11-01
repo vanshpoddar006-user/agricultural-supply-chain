@@ -29,7 +29,7 @@ const CONTENT_WIDTH = PAGE_WIDTH - 2 * MARGIN;
 
 // Helper: Add page with bottom page number
 let pageCount = 0;
-function addReportPage(isRoman = false, romanStr = '') {
+function addReportPage() {
   doc.addPage();
   pageCount++;
   return pageCount;
@@ -45,8 +45,8 @@ function printFooter(numStr) {
 // Helper: Table drawer
 function drawTable(startY, headers, rows, colWidths, alignments = []) {
   let y = startY;
-  const rowHeight = 22;
-  const headerHeight = 24;
+  const rowHeight = 20;
+  const headerHeight = 22;
 
   // Header background
   doc.save();
@@ -54,12 +54,12 @@ function drawTable(startY, headers, rows, colWidths, alignments = []) {
   doc.rect(MARGIN, y, CONTENT_WIDTH, headerHeight).stroke(BORDER_COLOR);
 
   // Header text
-  doc.font('Helvetica-Bold').fontSize(9).fillColor(TEXT_DARK);
+  doc.font('Helvetica-Bold').fontSize(8.5).fillColor(TEXT_DARK);
   let curX = MARGIN;
   headers.forEach((h, i) => {
     const w = colWidths[i];
     const align = alignments[i] || 'left';
-    doc.text(h, curX + 6, y + 7, { width: w - 12, align: align });
+    doc.text(h, curX + 5, y + 6, { width: w - 10, align: align });
     curX += w;
   });
   doc.restore();
@@ -68,7 +68,6 @@ function drawTable(startY, headers, rows, colWidths, alignments = []) {
 
   // Rows
   rows.forEach((row, rIdx) => {
-    // Check if near bottom
     if (y + rowHeight > PAGE_HEIGHT - 60) {
       addReportPage();
       y = MARGIN;
@@ -80,19 +79,48 @@ function drawTable(startY, headers, rows, colWidths, alignments = []) {
     }
     doc.rect(MARGIN, y, CONTENT_WIDTH, rowHeight).stroke(BORDER_COLOR);
 
-    doc.font('Helvetica').fontSize(8.5).fillColor(TEXT_DARK);
+    doc.font('Helvetica').fontSize(8).fillColor(TEXT_DARK);
     let x = MARGIN;
     row.forEach((cell, cIdx) => {
       const w = colWidths[cIdx];
       const align = alignments[cIdx] || 'left';
-      doc.text(String(cell), x + 6, y + 6, { width: w - 12, align: align });
+      doc.text(String(cell), x + 5, y + 5, { width: w - 10, align: align });
       x += w;
     });
     doc.restore();
     y += rowHeight;
   });
 
-  return y + 15;
+  return y + 12;
+}
+
+// Helper: Code block drawer
+function drawCodeBlock(codeText, title = '') {
+  const lines = codeText.trim().split('\n');
+  const lineHeight = 11.5;
+  const headerHeight = title ? 18 : 0;
+  const blockHeight = lines.length * lineHeight + headerHeight + 14;
+
+  if (doc.y + blockHeight > PAGE_HEIGHT - 60) {
+    addReportPage();
+    doc.y = MARGIN;
+  }
+
+  const startY = doc.y;
+  doc.save();
+  doc.rect(MARGIN, startY, CONTENT_WIDTH, blockHeight).fillAndStroke('#0f172a', '#1e293b');
+
+  if (title) {
+    doc.rect(MARGIN, startY, CONTENT_WIDTH, headerHeight).fill('#1e293b');
+    doc.font('Helvetica-Bold').fontSize(8).fillColor('#38bdf8').text(title, MARGIN + 10, startY + 5);
+  }
+
+  doc.font('Courier').fontSize(7.5).fillColor('#e2e8f0');
+  lines.forEach((line, i) => {
+    doc.text(line, MARGIN + 10, startY + headerHeight + 7 + i * lineHeight);
+  });
+  doc.restore();
+  doc.y = startY + blockHeight + 10;
 }
 
 // ==========================================
@@ -103,7 +131,6 @@ doc.moveDown(2);
 
 // University Header Simulation
 doc.save();
-// Emblem vector circle
 doc.circle(PAGE_WIDTH / 2 - 120, 95, 20).lineWidth(2).stroke(PRIMARY);
 doc.font('Helvetica-Bold').fontSize(14).fillColor(PRIMARY).text('AGRI', PAGE_WIDTH / 2 - 134, 90);
 
@@ -148,13 +175,9 @@ doc.font('Helvetica-Bold').fontSize(22).fillColor(TEXT_DARK).text('Abstract', MA
 doc.moveDown(2);
 
 const abstractPara1 = `The Agricultural Supply Chain Management System is a comprehensive database-driven platform developed to provide an efficient, transparent, and user-friendly platform for tracking agricultural produce from farm harvest to consumer retail shelves. The project focuses on combining an interactive web interface with a relational database to manage supply-chain-related information efficiently.`;
-
 const abstractPara2 = `The application provides features such as farmer harvest registration, cold storage monitoring, real-time logistics fleet dispatch, wholesale and retail distribution orders, and farm-to-table consumer traceability. Its modular interface and intuitive navigation make the different stages of the agricultural supply lifecycle easily accessible.`;
-
 const abstractPara3 = `MySQL is used as the database management system to store and organize information related to farmers, crops, harvest batches, logistics transits, and retail orders. The database consists of five normalized tables and uses primary keys, foreign keys, and enumerated domain constraints to maintain data integrity and establish relationships between records.`;
-
 const abstractPara4 = `The project demonstrates the practical application of database design, relational schema development, SQL DDL/DML, and client-server connectivity in building a database-driven supply chain portal. It also provides hands-on experience in integrating real-world logistical workflows with structured relational data management.`;
-
 const abstractPara5 = `Overall, the project serves as an academic implementation of an agricultural supply chain management application while demonstrating fundamental concepts of relational database management systems and modern software development.`;
 
 doc.font('Helvetica').fontSize(10.5).fillColor(TEXT_DARK).text(abstractPara1, { align: 'justify', lineGap: 5 });
@@ -186,15 +209,14 @@ const tocData1 = [
   ['1.2', 'Objectives of the Project', '6'],
   ['1.3', 'Importance and Relevance', '6'],
   ['1.4', 'Scope and Limitations', '7'],
-  ['2', 'System Design', '8'],
+  ['2', 'System Design & Database Architecture', '8'],
   ['2.1', 'Database Design Overview', '8'],
   ['2.2', 'Entity-Relationship (ER) Diagram', '8'],
   ['2.3', 'Entity Relationships & Cardinalities', '9'],
   ['2.4', 'Description of Tables and Attributes', '10'],
-  ['3', 'Frontend Implementation and Screenshots', '12'],
-  ['3.1', 'Overview', '12'],
-  ['3.2', 'Live Supply Chain Operations Dashboard', '13'],
-  ['3.3', 'Farmer Harvest Registration Feature', '14']
+  ['2.5', 'Database Implementation: SQL DDL Code', '12'],
+  ['2.6', 'Sample Data Population: SQL DML Code', '13'],
+  ['2.7', 'Relational Join Queries: SQL DQL Code', '14']
 ];
 
 drawTable(doc.y, ['S. No.', 'Contents', 'Page No.'], tocData1, [50, 360, 77], ['left', 'left', 'center']);
@@ -206,14 +228,18 @@ addReportPage();
 printFooter('3');
 
 const tocData2 = [
-  ['3.4', 'Cold Chain Logistics and Fleet Transit', '15'],
-  ['3.5', 'Retail Hub and Supermarket Orders', '15'],
-  ['3.6', 'Farm-to-Table Consumer Traceability Feature', '16'],
-  ['3.7', 'Java Desktop & Applet JDBC Interface', '16'],
-  ['4', 'Conclusion', '17'],
-  ['4.1', 'Summary of Project Work', '17'],
-  ['4.2', 'Achievement of Project Objectives', '17'],
-  ['4.3', 'Future Enhancements', '18']
+  ['3', 'Frontend Implementation and Screenshots', '15'],
+  ['3.1', 'System Architecture Overview', '15'],
+  ['3.2', 'Live Supply Chain Operations Dashboard', '16'],
+  ['3.3', 'Farmer Harvest Registration Feature', '17'],
+  ['3.4', 'Cold Chain Logistics and Fleet Transit', '18'],
+  ['3.5', 'Retail Hub and Supermarket Orders', '18'],
+  ['3.6', 'Farm-to-Table Consumer Traceability Feature', '19'],
+  ['3.7', 'Java Desktop & Applet JDBC Interface Code', '19'],
+  ['4', 'Conclusion & Future Scope', '20'],
+  ['4.1', 'Summary of Project Work', '20'],
+  ['4.2', 'Achievement of Project Objectives', '20'],
+  ['4.3', 'Future Enhancements & Bibliography', '21']
 ];
 
 doc.y = 80;
@@ -230,13 +256,13 @@ doc.moveDown(1.5);
 
 const figuresData = [
   ['Figure 2.1', 'ER Diagram for Agricultural Supply Chain System', '9'],
-  ['Figure 3.1', '3-Tier System Architecture Diagram', '12'],
-  ['Figure 3.2', 'Live Operations Dashboard – Inventory and KPI View', '13'],
-  ['Figure 3.3', 'Farmer Harvest Registration and Producer Directory', '14'],
-  ['Figure 3.4', 'Cold Chain Logistics and Dispatch Tracking', '15'],
-  ['Figure 3.5', 'Retail Hub and Distribution Order Placement', '15'],
-  ['Figure 3.6', 'Farm-to-Table Verified Consumer Audit Timeline', '16'],
-  ['Figure 3.7', 'Java Desktop / JApplet Interface with MySQL JDBC', '16']
+  ['Figure 3.1', '3-Tier System Architecture Diagram', '15'],
+  ['Figure 3.2', 'Live Operations Dashboard – Inventory and KPI View', '16'],
+  ['Figure 3.3', 'Farmer Harvest Registration and Producer Directory', '17'],
+  ['Figure 3.4', 'Cold Chain Logistics and Dispatch Tracking', '18'],
+  ['Figure 3.5', 'Retail Hub and Distribution Order Placement', '18'],
+  ['Figure 3.6', 'Farm-to-Table Verified Consumer Audit Timeline', '19'],
+  ['Figure 3.7', 'Java Desktop / JApplet Interface with MySQL JDBC', '19']
 ];
 
 drawTable(doc.y, ['Figure No.', 'Figure Title', 'Page No.'], figuresData, [80, 330, 77], ['left', 'left', 'center']);
@@ -253,7 +279,7 @@ doc.moveDown(1.5);
 const tablesListData = [
   ['Table 2.1', 'Farmers Table Schema', '10'],
   ['Table 2.2', 'Crops Table Schema', '10'],
-  ['Table 2.3', 'Batches Table Schema', '11'],
+  ['Table 2.3', 'Batches Table Schema (Core Unit)', '11'],
   ['Table 2.4', 'Logistics Table Schema', '11'],
   ['Table 2.5', 'Retail Orders Table Schema', '11']
 ];
@@ -332,7 +358,7 @@ addReportPage();
 printFooter('8');
 
 doc.font('Helvetica-Bold').fontSize(18).fillColor(TEXT_DARK).text('Chapter 2', MARGIN, 70);
-doc.font('Helvetica-Bold').fontSize(22).fillColor(TEXT_DARK).text('System Design');
+doc.font('Helvetica-Bold').fontSize(22).fillColor(TEXT_DARK).text('System Design & Database Architecture');
 doc.moveDown(1.2);
 
 doc.font('Helvetica-Bold').fontSize(13).fillColor(TEXT_DARK).text('2.1  Database Design Overview');
@@ -358,73 +384,69 @@ doc.moveDown(1);
 // Draw ER Diagram Box
 const boxY = doc.y;
 doc.save();
-doc.rect(MARGIN, boxY, CONTENT_WIDTH, 240).fillAndStroke('#fcfdfd', BORDER_COLOR);
+doc.rect(MARGIN, boxY, CONTENT_WIDTH, 235).fillAndStroke('#fcfdfd', BORDER_COLOR);
 
 // Entity Box 1: Farmers
-doc.rect(MARGIN + 20, boxY + 20, 100, 60).fillAndStroke('#e8f5e9', PRIMARY);
-doc.font('Helvetica-Bold').fontSize(9).fillColor(PRIMARY).text('FARMERS', MARGIN + 25, boxY + 26);
+doc.rect(MARGIN + 20, boxY + 15, 100, 60).fillAndStroke('#e8f5e9', PRIMARY);
+doc.font('Helvetica-Bold').fontSize(9).fillColor(PRIMARY).text('FARMERS', MARGIN + 25, boxY + 21);
 doc.font('Helvetica').fontSize(7.5).fillColor(TEXT_DARK)
-  .text('• farmer_id (PK)', MARGIN + 25, boxY + 39)
-  .text('• name, phone', MARGIN + 25, boxY + 50)
-  .text('• location, acres', MARGIN + 25, boxY + 61);
+  .text('• farmer_id (PK)', MARGIN + 25, boxY + 34)
+  .text('• name, phone', MARGIN + 25, boxY + 45)
+  .text('• location, acres', MARGIN + 25, boxY + 56);
 
 // Entity Box 2: Crops
-doc.rect(MARGIN + 20, boxY + 140, 100, 60).fillAndStroke('#e8f5e9', PRIMARY);
-doc.font('Helvetica-Bold').fontSize(9).fillColor(PRIMARY).text('CROPS', MARGIN + 25, boxY + 146);
+doc.rect(MARGIN + 20, boxY + 135, 100, 60).fillAndStroke('#e8f5e9', PRIMARY);
+doc.font('Helvetica-Bold').fontSize(9).fillColor(PRIMARY).text('CROPS', MARGIN + 25, boxY + 141);
 doc.font('Helvetica').fontSize(7.5).fillColor(TEXT_DARK)
-  .text('• crop_id (PK)', MARGIN + 25, boxY + 159)
-  .text('• crop_name', MARGIN + 25, boxY + 170)
-  .text('• category, price', MARGIN + 25, boxY + 181);
+  .text('• crop_id (PK)', MARGIN + 25, boxY + 154)
+  .text('• crop_name', MARGIN + 25, boxY + 165)
+  .text('• category, price', MARGIN + 25, boxY + 176);
 
 // Entity Box 3: Batches (Central)
-doc.rect(MARGIN + 190, boxY + 70, 115, 90).fillAndStroke('#fff3e0', '#e65100');
-doc.font('Helvetica-Bold').fontSize(10).fillColor('#e65100').text('BATCHES (Core)', MARGIN + 196, boxY + 78);
+doc.rect(MARGIN + 190, boxY + 65, 115, 90).fillAndStroke('#fff3e0', '#e65100');
+doc.font('Helvetica-Bold').fontSize(10).fillColor('#e65100').text('BATCHES (Core)', MARGIN + 196, boxY + 73);
 doc.font('Helvetica').fontSize(7.5).fillColor(TEXT_DARK)
-  .text('• batch_id (PK)', MARGIN + 196, boxY + 92)
-  .text('• farmer_id (FK)', MARGIN + 196, boxY + 103)
-  .text('• crop_id (FK)', MARGIN + 196, boxY + 114)
-  .text('• quantity_kg, grade', MARGIN + 196, boxY + 125)
-  .text('• current_status', MARGIN + 196, boxY + 136)
-  .text('• storage_temp', MARGIN + 196, boxY + 147);
+  .text('• batch_id (PK)', MARGIN + 196, boxY + 87)
+  .text('• farmer_id (FK)', MARGIN + 196, boxY + 98)
+  .text('• crop_id (FK)', MARGIN + 196, boxY + 109)
+  .text('• quantity_kg, grade', MARGIN + 196, boxY + 120)
+  .text('• current_status', MARGIN + 196, boxY + 131)
+  .text('• storage_temp', MARGIN + 196, boxY + 142);
 
 // Entity Box 4: Logistics
-doc.rect(MARGIN + 365, boxY + 20, 105, 75).fillAndStroke('#e3f2fd', '#1565c0');
-doc.font('Helvetica-Bold').fontSize(9).fillColor('#1565c0').text('LOGISTICS', MARGIN + 372, boxY + 26);
+doc.rect(MARGIN + 365, boxY + 15, 105, 75).fillAndStroke('#e3f2fd', '#1565c0');
+doc.font('Helvetica-Bold').fontSize(9).fillColor('#1565c0').text('LOGISTICS', MARGIN + 372, boxY + 21);
 doc.font('Helvetica').fontSize(7.5).fillColor(TEXT_DARK)
-  .text('• logistics_id (PK)', MARGIN + 372, boxY + 39)
-  .text('• batch_id (FK)', MARGIN + 372, boxY + 50)
-  .text('• transporter_name', MARGIN + 372, boxY + 61)
-  .text('• vehicle_number', MARGIN + 372, boxY + 72);
+  .text('• logistics_id (PK)', MARGIN + 372, boxY + 34)
+  .text('• batch_id (FK)', MARGIN + 372, boxY + 45)
+  .text('• transporter_name', MARGIN + 372, boxY + 56)
+  .text('• vehicle_number', MARGIN + 372, boxY + 67);
 
 // Entity Box 5: Retail Orders
-doc.rect(MARGIN + 365, boxY + 140, 105, 75).fillAndStroke('#f3e5f5', '#7b1fa2');
-doc.font('Helvetica-Bold').fontSize(9).fillColor('#7b1fa2').text('RETAIL ORDERS', MARGIN + 372, boxY + 146);
+doc.rect(MARGIN + 365, boxY + 135, 105, 75).fillAndStroke('#f3e5f5', '#7b1fa2');
+doc.font('Helvetica-Bold').fontSize(9).fillColor('#7b1fa2').text('RETAIL ORDERS', MARGIN + 372, boxY + 141);
 doc.font('Helvetica').fontSize(7.5).fillColor(TEXT_DARK)
-  .text('• order_id (PK)', MARGIN + 372, boxY + 159)
-  .text('• batch_id (FK)', MARGIN + 372, boxY + 170)
-  .text('• retailer_name', MARGIN + 372, boxY + 181)
-  .text('• total_amount', MARGIN + 372, boxY + 192);
+  .text('• order_id (PK)', MARGIN + 372, boxY + 154)
+  .text('• batch_id (FK)', MARGIN + 372, boxY + 165)
+  .text('• retailer_name', MARGIN + 372, boxY + 176)
+  .text('• total_amount', MARGIN + 372, boxY + 187);
 
 // Connector Lines
 doc.strokeColor('#78909c').lineWidth(1.2);
-// Farmer to Batch
-doc.moveTo(MARGIN + 120, boxY + 50).lineTo(MARGIN + 190, boxY + 100).stroke();
-// Crop to Batch
-doc.moveTo(MARGIN + 120, boxY + 170).lineTo(MARGIN + 190, boxY + 130).stroke();
-// Batch to Logistics
-doc.moveTo(MARGIN + 305, boxY + 100).lineTo(MARGIN + 365, boxY + 55).stroke();
-// Batch to Orders
-doc.moveTo(MARGIN + 305, boxY + 130).lineTo(MARGIN + 365, boxY + 175).stroke();
+doc.moveTo(MARGIN + 120, boxY + 45).lineTo(MARGIN + 190, boxY + 95).stroke();
+doc.moveTo(MARGIN + 120, boxY + 165).lineTo(MARGIN + 190, boxY + 125).stroke();
+doc.moveTo(MARGIN + 305, boxY + 95).lineTo(MARGIN + 365, boxY + 50).stroke();
+doc.moveTo(MARGIN + 305, boxY + 125).lineTo(MARGIN + 365, boxY + 170).stroke();
 
 doc.font('Helvetica-Bold').fontSize(8).fillColor(TEXT_MUTED)
-  .text('1:N', MARGIN + 145, boxY + 65)
-  .text('1:N', MARGIN + 145, boxY + 155)
-  .text('1:N', MARGIN + 325, boxY + 70)
-  .text('1:N', MARGIN + 325, boxY + 160);
+  .text('1:N', MARGIN + 145, boxY + 60)
+  .text('1:N', MARGIN + 145, boxY + 150)
+  .text('1:N', MARGIN + 325, boxY + 65)
+  .text('1:N', MARGIN + 325, boxY + 155);
 
 doc.restore();
 
-doc.y = boxY + 250;
+doc.y = boxY + 245;
 doc.font('Helvetica-Oblique').fontSize(8.5).fillColor(TEXT_MUTED).text('Figure 2.1: ER Diagram for the Agricultural Supply Chain System', { align: 'center' });
 
 // ==========================================
@@ -536,16 +558,196 @@ const t25 = [
 drawTable(doc.y, ['Field', 'Type', 'Key', 'Description'], t25, [110, 95, 45, 237]);
 
 // ==========================================
-// PAGE 12: CHAPTER 3 - IMPLEMENTATION
+// PAGE 12: CHAPTER 2 - 2.5 DDL CODE
 // ==========================================
 addReportPage();
 printFooter('11');
+
+doc.font('Helvetica-Bold').fontSize(14).fillColor(TEXT_DARK).text('2.5  Database Implementation: SQL DDL Code', MARGIN, 70);
+doc.moveDown(0.6);
+doc.font('Helvetica').fontSize(9.5).fillColor(TEXT_DARK).text(
+  `The Data Definition Language (DDL) creates the agri_supply_chain database and defines relational tables with primary keys, foreign keys with ON DELETE CASCADE actions, and ENUM constraint domains:`,
+  { align: 'justify', lineGap: 3 }
+);
+doc.moveDown(0.6);
+
+const ddlCode1 = `-- 1. Database Creation & Scope
+CREATE DATABASE IF NOT EXISTS agri_supply_chain;
+USE agri_supply_chain;
+
+-- 2. Farmers Table Definition
+CREATE TABLE farmers (
+    farmer_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    location VARCHAR(150) NOT NULL,
+    farm_size_acres DECIMAL(6,2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 3. Crops Catalog Table
+CREATE TABLE crops (
+    crop_id INT AUTO_INCREMENT PRIMARY KEY,
+    crop_name VARCHAR(100) NOT NULL,
+    category ENUM('Grains', 'Vegetables', 'Fruits', 'Pulses', 'Spices', 'Cash Crops') DEFAULT 'Grains',
+    base_price_per_kg DECIMAL(8,2) NOT NULL
+);
+
+-- 4. Batches Table (Core Unit with Cascading Constraints)
+CREATE TABLE batches (
+    batch_id VARCHAR(50) PRIMARY KEY,
+    farmer_id INT NOT NULL,
+    crop_id INT NOT NULL,
+    quantity_kg DECIMAL(10,2) NOT NULL,
+    harvest_date DATE NOT NULL,
+    quality_grade ENUM('Grade A (Export)', 'Grade B (Premium)', 'Grade C (Standard)') DEFAULT 'Grade A (Export)',
+    current_status ENUM('Harvested', 'Cold Storage', 'In Transit', 'Distributed', 'Retail Shelved', 'Sold') DEFAULT 'Harvested',
+    storage_temp_celsius DECIMAL(4,1) DEFAULT 18.0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (farmer_id) REFERENCES farmers(farmer_id) ON DELETE CASCADE,
+    FOREIGN KEY (crop_id) REFERENCES crops(crop_id) ON DELETE CASCADE
+);`;
+
+drawCodeBlock(ddlCode1, 'SQL DDL: Database, Farmers, Crops, and Batches Creation');
+
+// ==========================================
+// PAGE 13: CHAPTER 2 - 2.5 DDL & 2.6 DML CODE
+// ==========================================
+addReportPage();
+printFooter('12');
+
+doc.font('Helvetica-Bold').fontSize(14).fillColor(TEXT_DARK).text('2.5  DDL Code (Continued) & 2.6 DML Data Population', MARGIN, 70);
+doc.moveDown(0.5);
+
+const ddlCode2 = `-- 5. Logistics Fleet Tracking Table
+CREATE TABLE logistics (
+    logistics_id INT AUTO_INCREMENT PRIMARY KEY,
+    batch_id VARCHAR(50) NOT NULL,
+    transporter_name VARCHAR(100) NOT NULL,
+    vehicle_number VARCHAR(30) NOT NULL,
+    pickup_location VARCHAR(150) NOT NULL,
+    drop_location VARCHAR(150) NOT NULL,
+    dispatch_date DATE NOT NULL,
+    arrival_date DATE,
+    transit_status ENUM('Scheduled', 'In Transit', 'Reached Destination', 'Delayed') DEFAULT 'Scheduled',
+    FOREIGN KEY (batch_id) REFERENCES batches(batch_id) ON DELETE CASCADE
+);
+
+-- 6. Retail Supermarket Orders Table
+CREATE TABLE retail_orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    batch_id VARCHAR(50) NOT NULL,
+    retailer_name VARCHAR(120) NOT NULL,
+    retailer_city VARCHAR(100) NOT NULL,
+    quantity_ordered_kg DECIMAL(10,2) NOT NULL,
+    selling_price_per_kg DECIMAL(8,2) NOT NULL,
+    total_amount DECIMAL(12,2) NOT NULL,
+    order_date DATE NOT NULL,
+    order_status ENUM('Pending', 'Confirmed', 'Dispatched', 'Delivered') DEFAULT 'Confirmed',
+    FOREIGN KEY (batch_id) REFERENCES batches(batch_id) ON DELETE CASCADE
+);`;
+
+drawCodeBlock(ddlCode2, 'SQL DDL: Logistics and Retail Orders Tables');
+
+doc.moveDown(0.4);
+doc.font('Helvetica-Bold').fontSize(12).fillColor(TEXT_DARK).text('2.6  Sample Data Population: SQL DML Code');
+doc.moveDown(0.4);
+
+const dmlCode = `-- Seed Data for Farmers & Crops
+INSERT INTO farmers (name, phone, location, farm_size_acres) VALUES
+('Ramesh Kumar', '+91 98765 43210', 'Punjab, District Ludhiana', 15.5),
+('Sita Devi', '+91 98112 23344', 'Nashik, Maharashtra', 8.2),
+('Balwinder Singh', '+91 94567 89012', 'Karnal, Haryana', 22.0);
+
+INSERT INTO crops (crop_name, category, base_price_per_kg) VALUES
+('Basmati Rice 1121', 'Grains', 85.00),
+('Organic Wheat (Sharbati)', 'Grains', 42.00),
+('Alphonso Mango', 'Fruits', 250.00);
+
+-- Seed Data for Batches & Logistics
+INSERT INTO batches (batch_id, farmer_id, crop_id, quantity_kg, harvest_date, quality_grade, current_status) VALUES
+('BATCH-2026-RICE-01', 1, 1, 5000.00, '2026-10-15', 'Grade A (Export)', 'In Transit'),
+('BATCH-2026-WHEAT-02', 3, 2, 8500.00, '2026-10-18', 'Grade A (Export)', 'Cold Storage');
+
+INSERT INTO logistics (batch_id, transporter_name, vehicle_number, pickup_location, drop_location, dispatch_date, transit_status) VALUES
+('BATCH-2026-RICE-01', 'Kisan Express Cargo', 'PB-10-CX-4521', 'Ludhiana Mandi', 'Delhi Central Hub', '2026-10-27', 'In Transit');`;
+
+drawCodeBlock(dmlCode, 'SQL DML: Data Population Script');
+
+// ==========================================
+// PAGE 14: CHAPTER 2 - 2.7 SQL QUERIES (DQL)
+// ==========================================
+addReportPage();
+printFooter('13');
+
+doc.font('Helvetica-Bold').fontSize(14).fillColor(TEXT_DARK).text('2.7  Relational Join Queries: SQL DQL Code', MARGIN, 70);
+doc.moveDown(0.6);
+doc.font('Helvetica').fontSize(9.5).fillColor(TEXT_DARK).text(
+  `The following queries demonstrate the execution of multi-table joins, status aggregations, and traceability retrieval used by the application backend:`,
+  { align: 'justify', lineGap: 3 }
+);
+doc.moveDown(0.6);
+
+const dqlCode = `-- Query 1: Farm-to-Table Multi-Table Traceability Join
+-- Resolves complete audit trail from farmer origin to in-transit logistics carrier
+SELECT 
+    b.batch_id,
+    c.crop_name,
+    f.name AS farmer_name,
+    f.location AS farm_location,
+    b.quantity_kg,
+    b.harvest_date,
+    b.quality_grade,
+    b.storage_temp_celsius,
+    b.current_status,
+    l.transporter_name,
+    l.vehicle_number,
+    l.pickup_location,
+    l.drop_location,
+    l.transit_status
+FROM batches b
+JOIN farmers f ON b.farmer_id = f.farmer_id
+JOIN crops c ON b.crop_id = c.crop_id
+LEFT JOIN logistics l ON b.batch_id = l.batch_id
+WHERE b.batch_id = 'BATCH-2026-RICE-01';
+
+-- Query 2: Aggregate Valuation & Crop Volume Analytics
+SELECT 
+    c.category,
+    COUNT(b.batch_id) AS total_batches,
+    SUM(b.quantity_kg) AS total_harvested_volume_kg,
+    AVG(b.storage_temp_celsius) AS avg_cold_storage_temp
+FROM batches b
+JOIN crops c ON b.crop_id = c.crop_id
+GROUP BY c.category
+HAVING total_harvested_volume_kg > 1000;
+
+-- Query 3: Real-Time Active Transit Fleets Monitoring
+SELECT 
+    l.logistics_id,
+    l.batch_id,
+    l.transporter_name,
+    l.vehicle_number,
+    CONCAT(l.pickup_location, ' -> ', l.drop_location) AS route,
+    l.dispatch_date,
+    l.transit_status
+FROM logistics l
+WHERE l.transit_status = 'In Transit'
+ORDER BY l.dispatch_date DESC;`;
+
+drawCodeBlock(dqlCode, 'SQL DQL: Traceability, Aggregations, and Logistics Queries');
+
+// ==========================================
+// PAGE 15: CHAPTER 3 - IMPLEMENTATION
+// ==========================================
+addReportPage();
+printFooter('14');
 
 doc.font('Helvetica-Bold').fontSize(18).fillColor(TEXT_DARK).text('Chapter 3', MARGIN, 70);
 doc.font('Helvetica-Bold').fontSize(22).fillColor(TEXT_DARK).text('Frontend Implementation and Features');
 doc.moveDown(1.2);
 
-doc.font('Helvetica-Bold').fontSize(13).fillColor(TEXT_DARK).text('3.1  Overview');
+doc.font('Helvetica-Bold').fontSize(13).fillColor(TEXT_DARK).text('3.1  System Architecture Overview');
 doc.font('Helvetica').fontSize(10).fillColor(TEXT_DARK).text(
   `The Agricultural Supply Chain Management System provides users with a centralized, responsive interface for managing and verifying agricultural products. The application replicates enterprise agricultural logistics systems while showcasing practical relational database integration.`,
   { align: 'justify', lineGap: 4 }
@@ -556,7 +758,7 @@ doc.text(
   { align: 'justify', lineGap: 4 }
 );
 
-doc.moveDown(1.5);
+doc.moveDown(1.2);
 
 // Architecture Diagram Box
 const archBoxY = doc.y;
@@ -581,10 +783,10 @@ doc.y = archBoxY + 180;
 doc.font('Helvetica-Oblique').fontSize(8.5).fillColor(TEXT_MUTED).text('Figure 3.1: 3-Tier System Architecture Diagram', { align: 'center' });
 
 // ==========================================
-// PAGE 13: 3.2 OPERATIONS DASHBOARD
+// PAGE 16: 3.2 OPERATIONS DASHBOARD
 // ==========================================
 addReportPage();
-printFooter('12');
+printFooter('15');
 
 doc.font('Helvetica-Bold').fontSize(14).fillColor(TEXT_DARK).text('3.2  Live Supply Chain Operations Dashboard', MARGIN, 70);
 doc.moveDown(0.6);
@@ -600,7 +802,6 @@ const dBoxY = doc.y;
 doc.save();
 doc.rect(MARGIN, dBoxY, CONTENT_WIDTH, 180).fillAndStroke('#0f172a', '#334155');
 
-// KPI cards simulation
 doc.rect(MARGIN + 10, dBoxY + 10, 105, 45).fill('#1e293b');
 doc.font('Helvetica-Bold').fontSize(11).fillColor('#4ade80').text('17,700 kg', MARGIN + 16, dBoxY + 18);
 doc.font('Helvetica').fontSize(7.5).fillColor('#94a3b8').text('Total Volume', MARGIN + 16, dBoxY + 34);
@@ -613,7 +814,7 @@ doc.rect(MARGIN + 240, dBoxY + 10, 105, 45).fill('#1e293b');
 doc.font('Helvetica-Bold').fontSize(11).fillColor('#f472b6').text('1 Fleet Unit', MARGIN + 246, dBoxY + 18);
 doc.font('Helvetica').fontSize(7.5).fillColor('#94a3b8').text('In Cold Transit', MARGIN + 246, dBoxY + 34);
 
-doc.rect(MARGIN + 355, dBoxY + 10, 120, 45).fill('#1e293b');
+doc.rect(MARGIN + 355, dBoxY + 120, 120, 45).fill('#1e293b');
 doc.font('Helvetica-Bold').fontSize(11).fillColor('#fbbf24').text('Rs 1,87,000', MARGIN + 361, dBoxY + 18);
 doc.font('Helvetica').fontSize(7.5).fillColor('#94a3b8').text('Retail Revenue', MARGIN + 361, dBoxY + 34);
 
@@ -655,17 +856,11 @@ doc.restore();
 doc.y = dBoxY + 190;
 doc.font('Helvetica-Oblique').fontSize(8.5).fillColor(TEXT_MUTED).text('Figure 3.2: Live Operations Dashboard – Inventory and KPI View', { align: 'center' });
 
-doc.moveDown(1.2);
-doc.font('Helvetica').fontSize(10).fillColor(TEXT_DARK).text(
-  `Each row is color-coded using CSS badges corresponding to the relational ENUM status. Users can trigger an instant traceability breakdown by clicking the Trace button on any row.`,
-  { align: 'justify', lineGap: 4 }
-);
-
 // ==========================================
-// PAGE 14: 3.3 FARMER HARVEST PORTAL
+// PAGE 17: 3.3 FARMER HARVEST PORTAL
 // ==========================================
 addReportPage();
-printFooter('13');
+printFooter('16');
 
 doc.font('Helvetica-Bold').fontSize(14).fillColor(TEXT_DARK).text('3.3  Farmer Harvest Registration Feature', MARGIN, 70);
 doc.moveDown(0.6);
@@ -681,7 +876,6 @@ const fBoxY = doc.y;
 doc.save();
 doc.rect(MARGIN, fBoxY, CONTENT_WIDTH, 170).fillAndStroke('#fafbfc', BORDER_COLOR);
 
-// Left Form Box
 doc.rect(MARGIN + 15, fBoxY + 15, 230, 140).fillAndStroke('#ffffff', BORDER_COLOR);
 doc.font('Helvetica-Bold').fontSize(9).fillColor(PRIMARY).text('Register Harvest Batch', MARGIN + 25, fBoxY + 24);
 doc.font('Helvetica').fontSize(7.5).fillColor(TEXT_DARK)
@@ -692,7 +886,6 @@ doc.font('Helvetica').fontSize(7.5).fillColor(TEXT_DARK)
   .text('Grade:     Grade A (Export Quality)', MARGIN + 25, fBoxY + 106)
   .text('Storage:   18.0 °C', MARGIN + 25, fBoxY + 122);
 
-// Right Farmer List Box
 doc.rect(MARGIN + 255, fBoxY + 15, 215, 140).fillAndStroke('#ffffff', BORDER_COLOR);
 doc.font('Helvetica-Bold').fontSize(9).fillColor(PRIMARY).text('Verified Regional Producers', MARGIN + 265, fBoxY + 24);
 doc.font('Helvetica').fontSize(7.5).fillColor(TEXT_DARK)
@@ -706,17 +899,11 @@ doc.restore();
 doc.y = fBoxY + 180;
 doc.font('Helvetica-Oblique').fontSize(8.5).fillColor(TEXT_MUTED).text('Figure 3.3: Farmer Harvest Registration and Producer Directory', { align: 'center' });
 
-doc.moveDown(1.2);
-doc.font('Helvetica').fontSize(10).fillColor(TEXT_DARK).text(
-  `Upon form submission, an HTTP POST request is sent to the /api/batches endpoint. The backend validates constraints and writes the record to persistent storage, instantly updating the global dashboard.`,
-  { align: 'justify', lineGap: 4 }
-);
-
 // ==========================================
-// PAGE 15: 3.4 & 3.5 LOGISTICS & RETAIL
+// PAGE 18: 3.4 & 3.5 LOGISTICS & RETAIL
 // ==========================================
 addReportPage();
-printFooter('14');
+printFooter('17');
 
 doc.font('Helvetica-Bold').fontSize(14).fillColor(TEXT_DARK).text('3.4  Cold Chain Logistics and Fleet Transit', MARGIN, 70);
 doc.moveDown(0.5);
@@ -744,60 +931,63 @@ doc.text(
 );
 
 // ==========================================
-// PAGE 16: 3.6 TRACEABILITY & JAVA JDBC
+// PAGE 19: 3.6 TRACEABILITY & 3.7 JAVA JDBC CODE
 // ==========================================
 addReportPage();
-printFooter('15');
+printFooter('18');
 
-doc.font('Helvetica-Bold').fontSize(14).fillColor(TEXT_DARK).text('3.6  Farm-to-Table Consumer Traceability Feature', MARGIN, 70);
+doc.font('Helvetica-Bold').fontSize(14).fillColor(TEXT_DARK).text('3.6  Farm-to-Table Traceability & 3.7 Java JDBC Code', MARGIN, 70);
 doc.moveDown(0.5);
-doc.font('Helvetica').fontSize(10).fillColor(TEXT_DARK).text(
-  `The standout innovation of the system is the Farm-to-Table consumer traceability portal. When a consumer inputs a Batch ID or scans a product QR code, the system executes relational joins across five tables to render a verified vertical audit timeline.`,
-  { align: 'justify', lineGap: 4 }
+doc.font('Helvetica').fontSize(9.5).fillColor(TEXT_DARK).text(
+  `The consumer portal executes multi-table joins to render an authenticated audit trail. Below is the Java Database Connectivity (JDBC) implementation from DBConnection.java and AgriSupplyChainApp.java:`,
+  { align: 'justify', lineGap: 3 }
 );
 
-doc.moveDown(0.8);
-
-// Traceability Timeline Visual
-const tBoxY = doc.y;
-doc.save();
-doc.rect(MARGIN, tBoxY, CONTENT_WIDTH, 140).fillAndStroke('#f8fafc', BORDER_COLOR);
-
-doc.strokeColor(PRIMARY).lineWidth(2).moveTo(MARGIN + 30, tBoxY + 15).lineTo(MARGIN + 30, tBoxY + 125).stroke();
-
-doc.circle(MARGIN + 30, tBoxY + 25, 5).fillAndStroke(PRIMARY, '#ffffff');
-doc.font('Helvetica-Bold').fontSize(9).fillColor(TEXT_DARK).text('Stage 1: Farm Harvest & Quality Inspection', MARGIN + 45, tBoxY + 20);
-doc.font('Helvetica').fontSize(7.5).fillColor(TEXT_MUTED).text('Farmer: Ramesh Kumar | Ludhiana Mandi | Certified Grade A (Export Quality)', MARGIN + 45, tBoxY + 32);
-
-doc.circle(MARGIN + 30, tBoxY + 60, 5).fillAndStroke(PRIMARY, '#ffffff');
-doc.font('Helvetica-Bold').fontSize(9).fillColor(TEXT_DARK).text('Stage 2: Regional Cold Storage Hub', MARGIN + 45, tBoxY + 55);
-doc.font('Helvetica').fontSize(7.5).fillColor(TEXT_MUTED).text('State Agri Quality Board | Cold Storage maintained at 20.0 °C', MARGIN + 45, tBoxY + 67);
-
-doc.circle(MARGIN + 30, tBoxY + 95, 5).fillAndStroke(PRIMARY, '#ffffff');
-doc.font('Helvetica-Bold').fontSize(9).fillColor(TEXT_DARK).text('Stage 3: Logistics & Refrigerated Transit', MARGIN + 45, tBoxY + 90);
-doc.font('Helvetica').fontSize(7.5).fillColor(TEXT_MUTED).text('Kisan Express Cargo | Vehicle: PB-10-CX-4521 | Ludhiana Mandi -> Delhi Central Hub', MARGIN + 45, tBoxY + 102);
-
-doc.restore();
-
-doc.y = tBoxY + 150;
-doc.font('Helvetica-Oblique').fontSize(8.5).fillColor(TEXT_MUTED).text('Figure 3.6: Farm-to-Table Verified Consumer Audit Timeline', { align: 'center' });
-
-doc.moveDown(1.5);
-doc.font('Helvetica-Bold').fontSize(14).fillColor(TEXT_DARK).text('3.7  Java Desktop & Applet JDBC Interface');
 doc.moveDown(0.5);
-doc.font('Helvetica').fontSize(10).fillColor(TEXT_DARK).text(
-  `To meet strict academic specifications, the project includes standalone Java classes (DBConnection.java and AgriSupplyChainApp.java). AgriSupplyChainApp extends JApplet with a main() launcher, offering tabbed forms for Harvest Registration, Inventory Tables, Logistics, and Traceability using pure JDBC PreparedStatement calls.`,
-  { align: 'justify', lineGap: 4 }
-);
+
+const javaJdbcCode = `// 1. Database Connection Management (DBConnection.java)
+public class DBConnection {
+    private static final String URL = "jdbc:mysql://localhost:3306/agri_supply_chain?useSSL=false";
+    private static final String USER = "root";
+    private static final String PASSWORD = "password";
+
+    public static Connection getConnection() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            return DriverManager.getConnection(URL, USER, PASSWORD);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+}
+
+// 2. Parameterized SQL Execution in JApplet GUI (AgriSupplyChainApp.java)
+String sql = "INSERT INTO batches (batch_id, farmer_id, crop_id, quantity_kg, "
+           + "harvest_date, quality_grade, current_status, storage_temp_celsius) "
+           + "VALUES (?, ?, ?, ?, CURDATE(), ?, ?, ?)";
+
+try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+    stmt.setString(1, batchId);
+    stmt.setInt(2, Integer.parseInt(farmerIdStr));
+    stmt.setInt(3, Integer.parseInt(cropIdStr));
+    stmt.setDouble(4, Double.parseDouble(qtyStr));
+    stmt.setString(5, (String) cmbGrade.getSelectedItem());
+    stmt.setString(6, (String) cmbStatus.getSelectedItem());
+    stmt.setDouble(7, Double.parseDouble(tempStr));
+    stmt.executeUpdate(); // Zero SQL injection risk
+}`;
+
+drawCodeBlock(javaJdbcCode, 'Java JDBC: Connection Driver & Parameterized PreparedStatements');
 
 // ==========================================
-// PAGE 17: CHAPTER 4 - CONCLUSION
+// PAGE 20: CHAPTER 4 - CONCLUSION
 // ==========================================
 addReportPage();
-printFooter('16');
+printFooter('19');
 
 doc.font('Helvetica-Bold').fontSize(18).fillColor(TEXT_DARK).text('Chapter 4', MARGIN, 70);
-doc.font('Helvetica-Bold').fontSize(22).fillColor(TEXT_DARK).text('Conclusion');
+doc.font('Helvetica-Bold').fontSize(22).fillColor(TEXT_DARK).text('Conclusion & Future Scope');
 doc.moveDown(1.2);
 
 doc.font('Helvetica-Bold').fontSize(13).fillColor(TEXT_DARK).text('4.1  Summary of Project Work');
@@ -807,24 +997,19 @@ doc.font('Helvetica').fontSize(10).fillColor(TEXT_DARK).text(
 );
 doc.moveDown(0.5);
 doc.text(
-  `The application includes features such as harvest batch registration, cold chain temperature monitoring, transport route dispatching, retail order processing, and full consumer origin verification. The user interface is designed with a modern responsive theme and tabbed navigation for convenient access across operational stages.`,
-  { align: 'justify', lineGap: 4 }
-);
-doc.moveDown(0.5);
-doc.text(
   `The database was designed using MySQL and consists of five tables: Farmers, Crops, Batches, Logistics, and Retail Orders. Primary keys, foreign keys, and ENUM domain constraints were implemented to maintain data integrity and establish relationships between the tables.`,
   { align: 'justify', lineGap: 4 }
 );
 doc.moveDown(0.5);
 doc.text(
-  `Through this project, practical knowledge of database design, SQL queries, relational schema development, and frontend-to-backend connectivity was applied. The project demonstrates how relational database concepts can be integrated into an agricultural application to organize and manage supply chain information effectively.`,
+  `Through this project, practical knowledge of database design, SQL DDL/DML/DQL queries, relational schema development, and frontend-to-backend connectivity was applied. The project demonstrates how relational database concepts can be integrated into an agricultural application to organize and manage supply chain information effectively.`,
   { align: 'justify', lineGap: 4 }
 );
 
 doc.moveDown(1.5);
 doc.font('Helvetica-Bold').fontSize(13).fillColor(TEXT_DARK).text('4.2  Achievement of Project Objectives');
 doc.font('Helvetica').fontSize(10).fillColor(TEXT_DARK).text(
-  `The main objectives of the Agricultural Supply Chain Management System project were achieved by developing an interactive interface integrated with a relational database. The key objectives achieved are:`,
+  `The main objectives of the Agricultural Supply Chain Management System project were achieved by developing an interactive interface integrated with a relational database:`,
   { lineGap: 3 }
 );
 doc.moveDown(0.4);
@@ -844,10 +1029,10 @@ achievements.forEach(ach => {
 });
 
 // ==========================================
-// PAGE 18: FUTURE ENHANCEMENTS
+// PAGE 21: FUTURE ENHANCEMENTS & REFERENCES
 // ==========================================
 addReportPage();
-printFooter('17');
+printFooter('20');
 
 doc.font('Helvetica-Bold').fontSize(13).fillColor(TEXT_DARK).text('4.3  Future Enhancements', MARGIN, 70);
 doc.moveDown(0.6);

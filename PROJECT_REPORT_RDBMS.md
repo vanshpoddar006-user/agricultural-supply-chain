@@ -311,7 +311,7 @@ A large harvest batch (e.g., 5,000 kg) can be distributed across multiple retail
 
 ---
 
-### 2.5 Database Implementation & Schema DDL
+### 2.5 Database Implementation & Schema DDL (SQL DDL Code)
 
 ```sql
 -- Complete MySQL Schema DDL
@@ -376,6 +376,68 @@ CREATE TABLE retail_orders (
 ```
 
 ---
+
+
+
+### 2.6 Sample Data Population (SQL DML Code)
+
+```sql
+-- Seed Data for Farmers & Crops
+INSERT INTO farmers (name, phone, location, farm_size_acres) VALUES
+(\x27Ramesh Kumar\x27, \x27+91 98765 43210\x27, \x27Punjab, District Ludhiana\x27, 15.5),
+(\x27Sita Devi\x27, \x27+91 98112 23344\x27, \x27Nashik, Maharashtra\x27, 8.2),
+(\x27Balwinder Singh\x27, \x27+91 94567 89012\x27, \x27Karnal, Haryana\x27, 22.0);
+
+INSERT INTO crops (crop_name, category, base_price_per_kg) VALUES
+(\x27Basmati Rice 1121\x27, \x27Grains\x27, 85.00),
+(\x27Organic Wheat (Sharbati)\x27, \x27Grains\x27, 42.00),
+(\x27Alphonso Mango\x27, \x27Fruits\x27, 250.00);
+
+-- Seed Data for Batches & Logistics
+INSERT INTO batches (batch_id, farmer_id, crop_id, quantity_kg, harvest_date, quality_grade, current_status) VALUES
+(\x27BATCH-2026-RICE-01\x27, 1, 1, 5000.00, \x272026-10-15\x27, \x27Grade A (Export)\x27, \x27In Transit\x27),
+(\x27BATCH-2026-WHEAT-02\x27, 3, 2, 8500.00, \x272026-10-18\x27, \x27Grade A (Export)\x27, \x27Cold Storage\x27);
+
+INSERT INTO logistics (batch_id, transporter_name, vehicle_number, pickup_location, drop_location, dispatch_date, transit_status) VALUES
+(\x27BATCH-2026-RICE-01\x27, \x27Kisan Express Cargo\x27, \x27PB-10-CX-4521\x27, \x27Ludhiana Mandi\x27, \x27Delhi Central Hub\x27, \x272026-10-27\x27, \x27In Transit\x27);
+```
+
+### 2.7 Relational Join Queries (SQL DQL Code)
+
+```sql
+-- Query 1: Farm-to-Table Multi-Table Traceability Join
+SELECT 
+    b.batch_id,
+    c.crop_name,
+    f.name AS farmer_name,
+    f.location AS farm_location,
+    b.quantity_kg,
+    b.harvest_date,
+    b.quality_grade,
+    b.storage_temp_celsius,
+    b.current_status,
+    l.transporter_name,
+    l.vehicle_number,
+    l.pickup_location,
+    l.drop_location,
+    l.transit_status
+FROM batches b
+JOIN farmers f ON b.farmer_id = f.farmer_id
+JOIN crops c ON b.crop_id = c.crop_id
+LEFT JOIN logistics l ON b.batch_id = l.batch_id
+WHERE b.batch_id = \x27BATCH-2026-RICE-01\x27;
+
+-- Query 2: Aggregate Valuation & Crop Volume Analytics
+SELECT 
+    c.category,
+    COUNT(b.batch_id) AS total_batches,
+    SUM(b.quantity_kg) AS total_harvested_volume_kg,
+    AVG(b.storage_temp_celsius) AS avg_cold_storage_temp
+FROM batches b
+JOIN crops c ON b.crop_id = c.crop_id
+GROUP BY c.category
+HAVING total_harvested_volume_kg > 1000;
+```
 
 # Chapter 3: Implementation and System Features
 
